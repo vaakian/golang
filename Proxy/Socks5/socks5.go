@@ -29,6 +29,7 @@ func (sp *SocksProxy5Server) Listen() {
 		log.Fatal(err)
 		return
 	}
+	log.Println("socks5 proxy server listen on: ", sp.Host)
 	for {
 		client, err := srvLn.Accept()
 		if err != nil {

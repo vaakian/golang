@@ -14,12 +14,16 @@ type HttpProxyServer struct {
 	Host string
 }
 
+func NewHttpProxyServer(host string) *HttpProxyServer {
+	return &HttpProxyServer{Host: host}
+}
+
 func (htp *HttpProxyServer) Listen() {
 	ln, err := net.Listen("tcp", htp.Host)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("server listen on: " + htp.Host)
+	log.Println("http proxy server listen on: " + htp.Host)
 	for {
 		client, err := ln.Accept()
 		if err != nil {
