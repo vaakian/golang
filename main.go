@@ -29,6 +29,8 @@ func main() {
 		pxy = Socks5.NewSocksProxy5Server(parsed.Host, time.Second*5)
 	case "http":
 		pxy = Http.NewHttpProxyServer(parsed.Host)
+	default:
+		log.Fatal("unsupported protocol")
 	}
 	pxy.Listen()
 }
