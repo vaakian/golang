@@ -40,9 +40,9 @@ func (sp *SocksProxy5Server) Listen() {
 	}
 }
 func (sp *SocksProxy5Server) handleClientRequest(client net.Conn) {
+	defer client.Close()
 	clientBuffer := make([]byte, 1024)
 	size, err := client.Read(clientBuffer)
-	defer client.Close()
 	if err != nil {
 		log.Println("unable to read schema -> ", err)
 		return
@@ -53,7 +53,6 @@ func (sp *SocksProxy5Server) handleClientRequest(client net.Conn) {
 		client.Write([]byte{0x05, 0x00})
 	} else {
 		log.Println(" unsupported data gram -> ", clientBuffer[:size])
-		client.Close()
 		return
 	}
 	// Connect to destiny server
@@ -80,22 +79,19 @@ func (sp *SocksProxy5Server) connectToServer(client net.Conn) {
 }
 
 func (sp *SocksProxy5Server) handleConnectToServer(client net.Conn, connectionInfo []byte) {
-
-	//dialer := net.Dialer{Timeout: sp.Timeout}
-	//server, err := dialer.Dial("tcp", remoteAddr)
-	defer client.Close()
+	dialer := net.Dialer{Timeout: sp.Timeout}
 	dstHost, err := sp.parseHost(connectionInfo)
 	if err != nil {
 		log.Println("unable to parse host from  gram -> ", err)
 		return
 	}
-	fmt.Println("dst host: ", dstHost)
-	server, err := net.Dial("tcp", dstHost)
+	fmt.Println("Connect -> ", dstHost)
+	server, err := dialer.Dial("tcp", dstHost)
 	if err != nil {
 		log.Println("unable to connect to remote server ->", err)
 		return
 	}
-	// 连接远程成功，向客户端做出回应
+	// 连接远程成功，向客户端做出回应，这里只有Connect方法
 	client.Write([]byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 	defer server.Close()
 	go io.Copy(server, client)
